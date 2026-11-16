@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOVA - Desk Lamp Auth</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #0b0b0b;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        /* خلفية الإضاءة */
+        .ambient-light {
+            position: absolute;
+            top: -50px;
+            left: 20%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,220,150,0.15) 0%, rgba(11,11,11,0) 70%);
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            opacity: 0;
+        }
+        body.lamp-on .ambient-light {
+            opacity: 1;
+        }
+        
+        .container {
+            display: flex;
+            width: 90%;
+            max-width: 900px;
+            height: 550px;
+            background: #121212;
+            border-radius: 16px;
+            border: 1px solid #222;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* قسم المصباح */
+        .lamp-section {
+            flex: 1;
+            position: relative;
+            background: #0f0f0f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .lamp-svg {
+            width: 220px;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        /* قسم تسجيل الدخول */
+        .auth-section {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #161616;
+            border-left: 1px solid #222;
+        }
+        .brand {
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .title {
+            font-size: 26px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+        .subtitle {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 24px;
+        }
+        .input-group {
+            margin-bottom: 16px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 6px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px 14px;
+            background: #0a0a0a;
+            border: 1px solid #2c2c2c;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .input-group input:focus {
+            border-color: #d4af37;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .btn-submit:hover {
+            background: #d4af37;
+            color: #fff;
+        }
+    </style>
+</head>
+<body class="lamp-on">
+    <div class="ambient-light"></div>
+    
+    <div class="container">
+        <!-- المصباح التفاعلي -->
+        <div class="lamp-section">
+            <svg class="lamp-svg" viewBox="0 0 200 400" id="interactiveLamp">
+                <!-- سلك المصباح -->
+                <line x1="100" y1="0" x2="100" y2="120" stroke="#333" stroke-width="2" />
+                <!-- رأس المصباح -->
+                <g transform="translate(100, 120)">
+                    <path d="M-30,0 L30,0 L45,40 L-45,40 Z" fill="#222" stroke="#444" stroke-width="2" />
+                    <!-- لمبة الإضاءة -->
+                    <circle cx="0" cy="45" r="10" fill="#ffebb3" id="bulb" style="filter: drop-shadow(0 0 12px #ffcc00);" />
+                </g>
+                <!-- مفتاح الشد -->
+                <line x1="100" y1="160" x2="100" y2="210" stroke="#555" stroke-width="1.5" id="pullString" />
+                <circle cx="100" cy="212" r="5" fill="#888" id="pullHandle" cursor="pointer" />
+            </svg>
+        </div>
+
+        <!-- نافذة تسجيل الدخول -->
+        <div class="auth-section">
+            <div class="brand">NOVA SPACE</div>
+            <div class="title" id="formTitle">Welcome</div>
+            <div class="subtitle" id="formSub">Sign in to continue your account</div>
+            
+            <div class="input-group">
+                <label>Email address or username</label>
+                <input type="email" id="emailInput" placeholder="name@example.com">
+            </div>
+            
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="passwordInput" placeholder="••••••••">
+            </div>
+
+            <button class="btn-submit" id="submitBtn">Sign in</button>
+        </div>
+    </div>
+
+    <script>
+        // تأثير الصوت والمصباح (Web Audio API)
+        let isLampOn = true;
+        const body = document.body;
+        const bulb = document.getElementById('bulb');
+        const pullHandle = document.getElementById('pullHandle');
+        const pullString = document.getElementById('pullString');
+
+        function playClickSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.35);
+            } catch (e) {}
+        }
+
+        pullHandle.addEventListener('click', () => {
+            playClickSound();
+            isLampOn = !isLampOn;
+            if (isLampOn) {
+                body.classList.add('lamp-on');
+                bulb.style.fill = '#ffebb3';
+                bulb.style.filter = 'drop-shadow(0 0 12px #ffcc00)';
+            } else {
+                body.classList.remove('lamp-on');
+                bulb.style.fill = '#444';
+                bulb.style.filter = 'none';
+            }
+            
+            // حركة بسيطة لحبل المصباح
+            pullString.setAttribute('y2', '230');
+            pullHandle.setAttribute('cy', '232');
+            setTimeout(() => {
+                pullString.setAttribute('y2', '210');
+                pullHandle.setAttribute('cy', '212');
+            }, 150);
+        });
+    </script>
+</body>
+</html>
