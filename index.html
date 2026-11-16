@@ -1,227 +1,416 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NOVA - Desk Lamp Auth</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-        body {
-            background-color: #0b0b0b;
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
-        }
-        /* خلفية الإضاءة */
-        .ambient-light {
-            position: absolute;
-            top: -50px;
-            left: 20%;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(255,220,150,0.15) 0%, rgba(11,11,11,0) 70%);
-            pointer-events: none;
-            transition: opacity 0.5s ease;
-            opacity: 0;
-        }
-        body.lamp-on .ambient-light {
-            opacity: 1;
-        }
-        
-        .container {
-            display: flex;
-            width: 90%;
-            max-width: 900px;
-            height: 550px;
-            background: #121212;
-            border-radius: 16px;
-            border: 1px solid #222;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* قسم المصباح */
-        .lamp-section {
-            flex: 1;
-            position: relative;
-            background: #0f0f0f;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .lamp-svg {
-            width: 220px;
-            height: 100%;
-            cursor: pointer;
-        }
-
-        /* قسم تسجيل الدخول */
-        .auth-section {
-            flex: 1;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            background: #161616;
-            border-left: 1px solid #222;
-        }
-        .brand {
-            font-size: 11px;
-            letter-spacing: 2px;
-            color: #888;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-        .title {
-            font-size: 26px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #fff;
-        }
-        .subtitle {
-            font-size: 13px;
-            color: #888;
-            margin-bottom: 24px;
-        }
-        .input-group {
-            margin-bottom: 16px;
-        }
-        .input-group label {
-            display: block;
-            font-size: 12px;
-            color: #aaa;
-            margin-bottom: 6px;
-        }
-        .input-group input {
-            width: 100%;
-            padding: 12px 14px;
-            background: #0a0a0a;
-            border: 1px solid #2c2c2c;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .input-group input:focus {
-            border-color: #d4af37;
-        }
-        .btn-submit {
-            width: 100%;
-            padding: 12px;
-            background: #fff;
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.2s;
-        }
-        .btn-submit:hover {
-            background: #d4af37;
-            color: #fff;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>NOVA — منصة إدارة أعمالك</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- مكتبة Supabase السحابية -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* التصميم المدمج لضمان عمل الواجهة باحترافية تامة */
+    *{box-sizing:border-box} 
+    :root{--bg:#f5f6fa;--ink:#172033;--muted:#8790a2;--line:#e9ebf1;--navy:#101827;--gold:#e8bd70;--purple:#7768db}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:"Cairo",sans-serif}
+    button,input,textarea,select{font:inherit}
+    button{cursor:pointer}
+    .app-shell{min-height:100vh;display:flex}
+    .sidebar{width:252px;background:#101827;color:#fff;padding:27px 18px 18px;display:flex;flex-direction:column;flex-shrink:0}
+    .brand{display:flex;align-items:center;gap:11px;color:#fff;text-decoration:none;font:800 21px Inter,sans-serif;letter-spacing:2px;padding:0 8px 28px}
+    .brand small{display:block;color:#8490a4;font:600 8px Inter,sans-serif;letter-spacing:1.6px;margin-top:4px}
+    .brand-mark{width:39px;height:39px;border:1px solid #cba86c;border-radius:13px;display:grid;place-items:center;color:#e8bd70;font:800 21px Georgia}
+    .workspace{height:45px;border:1px solid #293448;border-radius:10px;display:flex;align-items:center;padding:0 11px;gap:9px;color:#d9dfeb;font-size:12px;margin-bottom:27px}
+    .workspace-icon{color:var(--gold)}
+    .chevron{margin-right:auto;color:#8490a4}
+    nav{display:grid;gap:6px}
+    .nav-link{background:transparent;border:0;color:#9ba6b8;display:flex;align-items:center;gap:12px;text-align:right;padding:12px 13px;border-radius:9px;font-size:12px;width:100%}
+    .nav-link>span{font-size:17px;width:20px;text-align:center}
+    .nav-link b{font-weight:600}
+    .nav-link.active,.nav-link:hover{background:#202c40;color:#fff}
+    .nav-link.active>span{color:var(--gold)}
+    .nav-link em{font-style:normal;font-size:9px;color:#d4b77f;margin-right:auto}
+    .sidebar-bottom{margin-top:auto}
+    .help-card{background:linear-gradient(145deg,#202d42,#192337);border:1px solid #2d3a4f;border-radius:13px;padding:16px;margin-bottom:18px}
+    .help-card>span{color:var(--gold);font-size:20px}
+    .help-card strong{display:block;font-size:12px;margin-top:8px}
+    .help-card p{font-size:10px;color:#9eabc0;line-height:1.8;margin:5px 0 9px}
+    .text-btn,.link-btn{border:0;background:none;color:#d8b879;font-size:10px;padding:0}
+    .user-mini{border-top:1px solid #293448;padding:16px 3px 0;display:flex;align-items:center;gap:9px}
+    .avatar{width:31px;height:31px;background:#e9c47e;color:#182235;border-radius:10px;display:grid;place-items:center;font-weight:800}
+    .user-mini b,.user-mini small{display:block;font-size:10px}
+    .user-mini small{color:#8290a5;font:9px Inter;margin-top:3px}
+    .dots{margin-right:auto;color:#8792a5}
+    .main{padding:29px 37px 18px;max-width:1600px;width:calc(100% - 252px);margin:0 auto}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:23px}
+    .eyebrow{font-size:10px;color:#969fb0}
+    .topbar h1{font-size:24px;margin:2px 0 0;font-weight:800}
+    .top-actions{display:flex;align-items:center;gap:9px}
+    .lang-btn,.icon-btn,.outline-btn{height:37px;border:1px solid var(--line);background:#fff;border-radius:9px;padding:0 13px;color:#596274;font:600 11px Inter}
+    .icon-btn{font-size:17px;width:38px;padding:0}
+    .primary-btn{height:38px;border:0;background:#17243a;color:#fff;border-radius:9px;padding:0 15px;font-size:11px;font-weight:700;box-shadow:0 5px 14px #17243a18}
+    .primary-btn:hover{background:#253956}
+    .hero{min-height:280px;background:radial-gradient(circle at 76% 40%,#34445f 0,#1b2a42 25%,#111d30 62%);border-radius:17px;color:white;display:flex;overflow:hidden;position:relative;padding:31px 35px;margin-bottom:28px}
+    .hero-copy{position:relative;z-index:2;max-width:53%}
+    .hero-tag{display:inline-flex;align-items:center;gap:7px;border:1px solid #58647a;border-radius:20px;padding:5px 10px;color:#d6dce6;font-size:9px}
+    .hero-tag i{width:6px;height:6px;background:#8ad6b1;border-radius:50%;box-shadow:0 0 8px #8ad6b1}
+    .hero h2{font-size:30px;line-height:1.45;margin:13px 0 8px;font-weight:800}
+    .hero p{font-size:11px;color:#b1bdce;line-height:2;max-width:410px;margin:0 0 16px}
+    .hero-btn{background:#e9c47e;color:#172238;border:0;border-radius:8px;padding:10px 14px;font-size:10px;font-weight:800}
+    .hero-btn b{margin-right:12px}
+    .section-heading{display:flex;justify-content:space-between;align-items:center;margin:0 0 14px}
+    .section-heading h3,.panel h3{font-size:14px;margin:0 0 3px}
+    .section-heading p,.panel-head p{font-size:10px;color:var(--muted);margin:0}
+    .muted-pill{font-size:9px;color:#6f7b90;background:#eaedf3;border-radius:20px;padding:5px 10px}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:20px}
+    .stat-card,.panel{background:#fff;border:1px solid #eceef3;border-radius:13px;padding:16px}
+    .stat-top{display:flex;justify-content:space-between;align-items:center;color:#7f899a;font-size:10px}
+    .stat-icon{width:29px;height:29px;border-radius:9px;display:grid;place-items:center;font-size:15px}
+    .violet{background:#f0edff;color:#7868d9}
+    .gold{background:#fff5e4;color:#c28c36}
+    .green{background:#e8f7ef;color:#44a47a}
+    .blue{background:#e9f2ff;color:#5288c8}
+    .stat-card>strong{display:block;font:800 25px Inter;color:#1d293c;margin:10px 0 5px}
+    .stat-card small{font-size:9px;color:#a0a8b5}
+    .accent-stat{background:linear-gradient(135deg,#fff,#fffaf0)}
+    .accent-stat>strong{font:700 15px Cairo;color:#9b773b;margin-top:15px}
+    .bottom-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:14px}
+    .panel{min-height:185px}
+    .panel-head{display:flex;justify-content:space-between;align-items:center}
+    .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 0;color:#8993a4;gap:4px}
+    .empty-icon{font-size:24px;color:#c6cbd5;margin-bottom:3px}
+    .empty-state b{font-size:11px;color:#596477}
+    .empty-state span{font-size:9px}
+    .progress-label{font:600 10px Inter;color:#8d98a9}
+    .progress{height:5px;background:#eef0f4;border-radius:10px;margin:17px 0 12px;overflow:hidden}
+    .progress i{display:block;width:0;height:100%;background:#d4ad69;border-radius:10px;transition:width .3s}
+    .check-row{display:flex;align-items:center;gap:9px;font-size:10px;color:#7b8596;padding:6px 0}
+    .check-circle{width:16px;height:16px;border:1px solid #dfe3ea;border-radius:50%;display:grid;place-items:center;color:transparent;font-size:10px}
+    .main footer{display:flex;justify-content:space-between;color:#a3aab6;font:8px Inter;letter-spacing:.4px;padding:25px 2px 0}
+    .hidden{display:none!important}
+    .toolbar{display:flex;gap:10px;margin:18px 0}
+    .toolbar input,.toolbar select,.settings-panel input,.modal input,.modal textarea{border:1px solid #e6e9ef;background:#fff;border-radius:8px;padding:10px 12px;font-size:11px;outline:none;color:#263248}
+    .toolbar input{flex:1}
+    .toolbar select{min-width:150px}
+    .products-grid,.catalog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+    .product-card{background:#fff;border:1px solid #eceef3;border-radius:12px;padding:16px}
+    .catalog-head{background:#17243a;color:#fff;border-radius:14px;padding:23px;display:flex;align-items:center;gap:14px;margin:18px 0}
+    .catalog-logo{width:43px;height:43px;border:1px solid #d7b574;border-radius:12px;display:grid;place-items:center;color:#e8bd70;font:800 22px Georgia}
+    .catalog-head h2{font-size:18px;margin:0}
+    .catalog-head p{font-size:10px;color:#b8c2d0;margin:4px 0 0}
+    .catalog-label{margin-right:auto;font:8px Inter;letter-spacing:1.4px;color:#d8b879}
+    .settings-panel{max-width:550px;display:grid;gap:9px}
+    .settings-panel label,.modal label{font-size:10px;color:#687387;margin-top:6px}
+    .settings-panel input{width:100%}
+    .settings-panel .primary-btn{justify-self:start;margin-top:8px}
+    .modal-backdrop{position:fixed;inset:0;background:#11182799;display:grid;place-items:center;padding:18px;z-index:10}
+    .modal{width:min(440px,100%);background:#fff;border-radius:16px;padding:25px;display:grid;gap:9px;position:relative;box-shadow:0 25px 80px #0003}
+    .modal h2{font-size:20px;margin:0 0 5px}
+    .modal input,.modal textarea{width:100%;resize:vertical}
+    .modal-close{position:absolute;left:17px;top:13px;border:0;background:#f1f2f5;border-radius:50%;width:29px;height:29px;font-size:19px;color:#596477}
+    .full-btn{width:100%;margin-top:8px}
+    .toast{position:fixed;bottom:25px;left:50%;transform:translate(-50%,20px);background:#17243a;color:#fff;padding:10px 17px;border-radius:9px;font-size:11px;opacity:0;pointer-events:none;transition:.25s;z-index:20}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:760px){.app-shell{display:block}.sidebar{width:100%;height:auto;padding:12px 14px;display:block}.workspace,.sidebar-bottom{display:none}nav{display:flex;overflow:auto;gap:5px;padding-bottom:2px}.main{width:100%;padding:19px 14px}.products-grid,.catalog-grid{grid-template-columns:repeat(2,1fr)}.toolbar{flex-direction:column}}
+  </style>
 </head>
-<body class="lamp-on">
-    <div class="ambient-light"></div>
-    
-    <div class="container">
-        <!-- المصباح التفاعلي -->
-        <div class="lamp-section">
-            <svg class="lamp-svg" viewBox="0 0 200 400" id="interactiveLamp">
-                <!-- سلك المصباح -->
-                <line x1="100" y1="0" x2="100" y2="120" stroke="#333" stroke-width="2" />
-                <!-- رأس المصباح -->
-                <g transform="translate(100, 120)">
-                    <path d="M-30,0 L30,0 L45,40 L-45,40 Z" fill="#222" stroke="#444" stroke-width="2" />
-                    <!-- لمبة الإضاءة -->
-                    <circle cx="0" cy="45" r="10" fill="#ffebb3" id="bulb" style="filter: drop-shadow(0 0 12px #ffcc00);" />
-                </g>
-                <!-- مفتاح الشد -->
-                <line x1="100" y1="160" x2="100" y2="210" stroke="#555" stroke-width="1.5" id="pullString" />
-                <circle cx="100" cy="212" r="5" fill="#888" id="pullHandle" cursor="pointer" />
-            </svg>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#"><span class="brand-mark">N</span><span>NOVA<small>BUSINESS PLATFORM</small></span></a>
+      <div class="workspace"><span class="workspace-icon">✦</span><span id="workspaceName">مشروعي</span><span class="chevron">⌄</span></div>
+      <nav>
+        <button class="nav-link active" data-view="overview"><span>◫</span><b>نظرة عامة</b></button>
+        <button class="nav-link" data-view="products"><span>▦</span><b>المنتجات</b></button>
+        <button class="nav-link" data-view="menu"><span>▤</span><b>المنيو / الكتالوج</b></button>
+        <button class="nav-link" data-view="marketing"><span>✧</span><b>استوديو التسويق</b><em>قريبًا</em></button>
+        <button class="nav-link" data-view="settings"><span>⚙</span><b>الإعدادات</b></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="help-card"><span>✦</span><strong>خلّي شغلك أسهل</strong><p>NOVA بتكبر مع مشروعك. ابدأ بإضافة أول منتج.</p><button class="text-btn" data-view="products">أضف أول منتج ←</button></div>
+        <div class="user-mini"><div class="avatar">N</div><div><b>صاحب المشروع</b><small>Cloud workspace</small></div><span class="dots">•••</span></div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div><div class="eyebrow">مساحة عملك</div><h1 id="pageTitle">نظرة عامة</h1></div>
+        <div class="top-actions"><button class="primary-btn" id="quickAdd">＋ <span>منتج جديد</span></button></div>
+      </header>
+      
+      <section id="overviewView" class="view">
+        <div class="hero">
+          <div class="hero-copy">
+            <span class="hero-tag"><i></i><span>مساحة عملك جاهزة</span></span>
+            <h2>كل مشروع كبير<br>بيبدأ بخطوة ذكية.</h2>
+            <p>نظّم منتجاتك واعرضها لعملائك من مكان واحد. دي أول خطوة لبناء حضور رقمي أقوى لبيزنسك.</p>
+            <button class="hero-btn" data-view="products"><span>ابدأ بإضافة منتجاتك</span> <b>←</b></button>
+          </div>
+        </div>
+        
+        <div class="section-heading"><div><h3>ملخص مشروعك</h3><p>نظرة سريعة على مساحة عملك</p></div><span class="muted-pill">متصل بالسحابة</span></div>
+        
+        <div class="stats-grid">
+          <article class="stat-card"><div class="stat-top"><span>إجمالي المنتجات</span><span class="stat-icon violet">▦</span></div><strong id="productCount">0</strong><small>منتجات تمت إضافتها</small></article>
+          <article class="stat-card"><div class="stat-top"><span>التصنيفات</span><span class="stat-icon gold">◈</span></div><strong id="categoryCount">0</strong><small>نظّم منتجاتك بسهولة</small></article>
+          <article class="stat-card"><div class="stat-top"><span>حالة الكتالوج</span><span class="stat-icon green">▤</span></div><strong class="status-word" id="menuStatus">—</strong><small>جاهز للمعاينة</small></article>
+          <article class="stat-card accent-stat"><div class="stat-top"><span>خطوتك التالية</span><span class="stat-icon blue">✧</span></div><strong>انشر كتالوجك</strong><small>شارك منتجاتك مع عملائك</small></article>
         </div>
 
-        <!-- نافذة تسجيل الدخول -->
-        <div class="auth-section">
-            <div class="brand">NOVA SPACE</div>
-            <div class="title" id="formTitle">Welcome</div>
-            <div class="subtitle" id="formSub">Sign in to continue your account</div>
-            
-            <div class="input-group">
-                <label>Email address or username</label>
-                <input type="email" id="emailInput" placeholder="name@example.com">
-            </div>
-            
-            <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="passwordInput" placeholder="••••••••">
-            </div>
-
-            <button class="btn-submit" id="submitBtn">Sign in</button>
+        <div class="bottom-grid">
+          <article class="panel">
+            <div class="panel-head"><div><h3>أحدث المنتجات</h3><p>آخر ما أضفته إلى مشروعك</p></div><button class="link-btn" data-view="products">عرض الكل ←</button></div>
+            <div id="recentList" class="recent-list empty-state"><div class="empty-icon">▦</div><b>لسه مفيش منتجات</b><span>أضف أول منتج عشان يظهر هنا.</span></div>
+          </article>
+          <article class="panel checklist">
+            <div class="panel-head"><div><h3>خطوات الانطلاق</h3><p>جهّز مشروعك على NOVA</p></div><span class="progress-label" id="progressLabel">0/3</span></div>
+            <div class="progress"><i id="progressBar"></i></div>
+            <div class="check-row"><span class="check-circle">✓</span><span>سمّي مساحة عملك</span></div>
+            <div class="check-row"><span class="check-circle">✓</span><span>أضف أول منتج</span></div>
+            <div class="check-row"><span class="check-circle">✓</span><span>عاين الكتالوج</span></div>
+          </article>
         </div>
-    </div>
+      </section>
 
-    <script>
-        // تأثير الصوت والمصباح (Web Audio API)
-        let isLampOn = true;
-        const body = document.body;
-        const bulb = document.getElementById('bulb');
-        const pullHandle = document.getElementById('pullHandle');
-        const pullString = document.getElementById('pullString');
+      <section id="productsView" class="view hidden">
+        <div class="section-heading"><div><h3>منتجاتك</h3><p>أضف وعدّل المنتجات اللي بتقدمها</p></div><button class="primary-btn" id="addProductBtn">＋ <span>إضافة منتج</span></button></div>
+        <div class="toolbar"><input id="searchProducts" type="search" placeholder="ابحث عن منتج..."><select id="categoryFilter"><option value="all">كل التصنيفات</option></select></div>
+        <div id="productsGrid" class="products-grid"></div>
+      </section>
 
-        function playClickSound() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(120, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.35);
-            } catch (e) {}
+      <section id="menuView" class="view hidden">
+        <div class="section-heading"><div><h3>كتالوج مشروعك</h3><p>الشكل اللي ممكن تعرض بيه منتجاتك لعملائك</p></div></div>
+        <div class="catalog-head"><div class="catalog-logo">N</div><div><h2 id="catalogBusinessName">مشروعي</h2><p>منتجات مختارة بعناية — يسعدنا خدمتك</p></div><span class="catalog-label">NOVA CATALOG</span></div>
+        <div id="catalogGrid" class="catalog-grid"></div>
+      </section>
+
+      <section id="marketingView" class="view hidden">
+        <div style="text-align:center; padding:50px;"><h2>استوديو التسويق قادم قريبًا ✦</h2></div>
+      </section>
+
+      <section id="settingsView" class="view hidden">
+        <div class="section-heading"><div><h3>إعدادات مساحة العمل</h3><p>عدّل بيانات مشروعك الأساسية</p></div></div>
+        <div class="panel settings-panel">
+          <label>اسم المشروع</label><input id="businessNameInput" placeholder="مثال: NOVA Store">
+          <label>نوع النشاط</label><input id="businessTypeInput" placeholder="مثال: متجر / مطعم / خدمات">
+          <button class="primary-btn" id="saveSettings">حفظ التغييرات</button>
+        </div>
+      </section>
+
+      <footer><span>© 2026 NOVA</span><span>مساحة واحدة. إمكانيات أكبر.</span><span>BUILT TO GROW ✦</span></footer>
+    </main>
+  </div>
+
+  <div class="modal-backdrop hidden" id="productModal">
+    <form class="modal" id="productForm">
+      <button type="button" class="modal-close" id="closeModal">×</button>
+      <span class="eyebrow">NOVA / PRODUCTS</span>
+      <h2>إضافة منتج جديد</h2>
+      <label>اسم المنتج</label><input id="productName" required maxlength="70" placeholder="مثال: بوكس شوكولاتة">
+      <label>التصنيف</label><input id="productCategory" required maxlength="40" placeholder="مثال: حلويات">
+      <label>السعر</label><input id="productPrice" type="number" min="0" step="0.01" required placeholder="0.00">
+      <label>وصف مختصر</label><textarea id="productDescription" rows="3" maxlength="180" placeholder="اكتب وصفًا بسيطًا للمنتج..."></textarea>
+      <button class="primary-btn full-btn" type="submit">حفظ المنتج</button>
+    </form>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // الاتصال بقاعدة بيانات Supabase
+    const SUPABASE_URL = "https://gaiusezqqqparjfbmjmc.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_YY0Xk3VWcVv80Va_1ZBvyg_pHfsfhr6";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let state = { currentUser: null, currentBusiness: null, products: [] };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      initUI();
+      await checkUserSession();
+    });
+
+    async function checkUserSession() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) {
+        state.currentUser = session.user;
+        await loadUserData();
+      } else {
+        showAuthPrompt();
+      }
+    }
+
+    async function showAuthPrompt() {
+      const email = prompt("أهلاً بك في NOVA! أدخل بريدك الإلكتروني لتسجيل الدخول أو إنشاء حساب:");
+      if (!email) return;
+      const password = prompt("أدخل كلمة المرور (6 أحرف على الأقل):");
+      if (!password) return;
+
+      let { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) {
+        let { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({ email, password });
+        if (signUpError) {
+          alert("خطأ في المصادقة: " + signUpError.message);
+          showAuthPrompt();
+          return;
         }
+        alert("تم إنشاء الحساب بنجاح!");
+        state.currentUser = signUpData.user;
+      } else {
+        state.currentUser = data.user;
+      }
+      await loadUserData();
+    }
 
-        pullHandle.addEventListener('click', () => {
-            playClickSound();
-            isLampOn = !isLampOn;
-            if (isLampOn) {
-                body.classList.add('lamp-on');
-                bulb.style.fill = '#ffebb3';
-                bulb.style.filter = 'drop-shadow(0 0 12px #ffcc00)';
-            } else {
-                body.classList.remove('lamp-on');
-                bulb.style.fill = '#444';
-                bulb.style.filter = 'none';
-            }
-            
-            // حركة بسيطة لحبل المصباح
-            pullString.setAttribute('y2', '230');
-            pullHandle.setAttribute('cy', '232');
-            setTimeout(() => {
-                pullString.setAttribute('y2', '210');
-                pullHandle.setAttribute('cy', '212');
-            }, 150);
+    async function loadUserData() {
+      if (!state.currentUser) return;
+      let { data: businesses } = await supabaseClient.from('businesses').select('*').eq('owner_id', state.currentUser.id);
+
+      if (businesses && businesses.length > 0) {
+        state.currentBusiness = businesses[0];
+      } else {
+        let { data: newBiz } = await supabaseClient.from('businesses').insert([{ name: 'مشروعي الأول', type: 'متجر عام', owner_id: state.currentUser.id }]).select();
+        if (newBiz) state.currentBusiness = newBiz[0];
+      }
+
+      if (state.currentBusiness) {
+        document.getElementById('workspaceName').textContent = state.currentBusiness.name;
+        document.getElementById('catalogBusinessName').textContent = state.currentBusiness.name;
+        document.getElementById('businessNameInput').value = state.currentBusiness.name;
+        document.getElementById('businessTypeInput').value = state.currentBusiness.type || '';
+      }
+      await fetchProducts();
+    }
+
+    async function fetchProducts() {
+      if (!state.currentUser) return;
+      let { data, error } = await supabaseClient.from('products').select('*').eq('owner_id', state.currentUser.id).order('created_at', { ascending: false });
+      if (!error && data) {
+        state.products = data;
+        renderProducts();
+        updateStats();
+      }
+    }
+
+    function initUI() {
+      document.querySelectorAll('.nav-link, [data-view]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const viewName = btn.getAttribute('data-view');
+          if (!viewName) return;
+          document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+          document.getElementById(viewName + 'View')?.classList.remove('hidden');
+          document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+          btn.classList.add('active');
         });
-    </script>
+      });
+
+      const modal = document.getElementById('productModal');
+      document.getElementById('quickAdd')?.addEventListener('click', () => modal.classList.remove('hidden'));
+      document.getElementById('addProductBtn')?.addEventListener('click', () => modal.classList.remove('hidden'));
+      document.getElementById('closeModal')?.addEventListener('click', () => modal.classList.add('hidden'));
+
+      document.getElementById('productForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!state.currentUser) return;
+
+        const name = document.getElementById('productName').value;
+        const category = document.getElementById('productCategory').value;
+        const price = parseFloat(document.getElementById('productPrice').value);
+        const description = document.getElementById('productDescription').value;
+
+        const { error } = await supabaseClient.from('products').insert([{ name, category, price, description, owner_id: state.currentUser.id }]);
+        if (error) { alert("حدث خطأ أثناء حفظ المنتج."); return; }
+
+        modal.classList.add('hidden');
+        e.target.reset();
+        await fetchProducts();
+        showToast("تم حفظ المنتج بنجاح في السحابة ✦");
+      });
+
+      document.getElementById('saveSettings')?.addEventListener('click', async () => {
+        if (!state.currentBusiness || !state.currentUser) return;
+        const name = document.getElementById('businessNameInput').value;
+        const type = document.getElementById('businessTypeInput').value;
+
+        const { error } = await supabaseClient.from('businesses').update({ name, type }).eq('id', state.currentBusiness.id);
+        if (!error) {
+          state.currentBusiness.name = name;
+          state.currentBusiness.type = type;
+          document.getElementById('workspaceName').textContent = name;
+          document.getElementById('catalogBusinessName').textContent = name;
+          showToast("تم حفظ الإعدادات بنجاح ✦");
+        }
+      });
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('productsGrid');
+      const catalogGrid = document.getElementById('catalogGrid');
+      const recentList = document.getElementById('recentList');
+      if (!grid) return;
+
+      if (state.products.length === 0) {
+        grid.innerHTML = `<div class="empty-state"><p>لا توجد منتجات مضافة حتى الآن.</p></div>`;
+        if (catalogGrid) catalogGrid.innerHTML = `<p class="muted">الكتالوج فارغ حالياً.</p>`;
+        if (recentList) recentList.innerHTML = `<div class="empty-icon">▦</div><b>لسه مفيش منتجات</b>`;
+        return;
+      }
+
+      grid.innerHTML = state.products.map(p => `
+        <div class="product-card">
+          <h4>${escapeHtml(p.name)}</h4>
+          <span class="badge" style="background:#3b82f6; color:#fff; padding:2px 8px; border-radius:6px; font-size:12px;">${escapeHtml(p.category || 'عام')}</span>
+          <p class="price" style="font-weight:bold; color:#10b981; margin:8px 0;">${p.price} ج.م</p>
+          <p class="desc" style="color:#8992a2; font-size:13px;">${escapeHtml(p.description || '')}</p>
+          <button onclick="deleteProduct('${p.id}')" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; margin-top:8px;">حذف</button>
+        </div>
+      `).join('');
+
+      if (catalogGrid) {
+        catalogGrid.innerHTML = state.products.map(p => `
+          <div class="product-card">
+            <h3>${escapeHtml(p.name)}</h3>
+            <span style="color:#10b981; font-weight:bold;">${p.price} ج.م</span>
+            <p>${escapeHtml(p.description || '')}</p>
+          </div>
+        `).join('');
+      }
+
+      if (recentList) {
+        recentList.innerHTML = state.products.slice(0, 3).map(p => `
+          <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #eee;">
+            <b>${escapeHtml(p.name)}</b><span style="color:#10b981;">${p.price} ج.م</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    window.deleteProduct = async function(id) {
+      if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
+      const { error } = await supabaseClient.from('products').delete().eq('id', id);
+      if (!error) { await fetchProducts(); showToast("تم الحذف بنجاح"); }
+    };
+
+    function updateStats() {
+      document.getElementById('productCount').textContent = state.products.length;
+      const categories = [...new Set(state.products.map(p => p.category))].filter(Boolean);
+      document.getElementById('categoryCount').textContent = categories.length;
+      const menuStatus = document.getElementById('menuStatus');
+      if (menuStatus) menuStatus.textContent = state.products.length > 0 ? "نشط وجاهز" : "فارغ";
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+    }
+  </script>
 </body>
 </html>
